@@ -1,30 +1,47 @@
 # coding=UTF-8
+import requests, json, ast, os
 from bs4 import BeautifulSoup
-import requests
 
 
 class Downloader():
-    def __init__(self, url, path):
-        """Initializer for downloader"""
-        self.origin_url = url
-        self.origin_response = requests.get(url)
-        self.origin_soup = BeautifulSoup(self.origin_response.content, 'lxml')
-        self.origin_path = path
+    def __init__(self, url):
+        self.url = url
 
-    def count(self):
-        """ Get Pictures' Count """
-        count_text = self.origin_soup.find_all('span', 'num')[0].text
-        self.count = count_text.split('/')[-1]
+    def fetch_info(self):
+        response = requests.get(self.url).content
+        soup = BeautifulSoup(response, 'lxml')
+        title = soup.title.text
+        pic_infos_json = self.fetch_pic_infos_json(response)
+        images = self.process_json_string(pic_infos_json)
 
-    def initial_url(self):
-        self.url = self.origin_url.split('=')[0] + '='
+        return title, images
 
-    def download_image(self, url):
-        image = requests.get(url)
-        temp_path = self.origin_path + '/' if self.origin_path[-1] == '/' else '' + url.split('/')[-1]
-        with open(temp_path, 'wb') as f:
-            f.write(image.content)
+    def fetch_pic_infos_json(self, content):
+        key1 = "'[{\"current_num\":1"
+        key2 = "var nextTenInfosJson"
+        head = content.find(key1)
+        tail = content.find(key2)
+        return content[head:tail].strip()[:-1]
 
-    def image_url(self, response):
-        soup = BeautifulSoup(response.content, 'lxml')
-        
+    def process_json_string(self, json_string):
+        return ast.literal_eval(json_string)
+
+    def download_images(self, images):
+        images = json.loads(images)
+        for image in images:
+            image_path = self.path + image.get('pic_url').split('/')[-1].encode('UTF-8')
+            image_data = requests.get(image.get('pic_url_1920_b'), image.get('pic_url', None)).content
+            with open(image_path, 'wb') as f:
+                f.write(image_data)
+        return True
+
+    def start(self):
+        title, images = self.fetch_info()
+        self.path = 'Pictures/%s/' % title
+        os.mkdir(self.path)
+        self.download_images(images)
+
+
+if __name__ == '__main__':
+    d = Downloader('http://travel.fengniao.com/slide/526/5264127_1.html#p=1')
+    d.start()
