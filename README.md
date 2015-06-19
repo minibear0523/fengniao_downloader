@@ -6,6 +6,12 @@
 
 原理很简单,也很low,目前来看还有很多地方需要优化.
 
+# Usage
+
+```python downloader <url> ```
+
+这里的url是http://*.fengniao.com/slide/* 的才可以.
+
 # TODO
 
 1. 做一些常规的异常处理
