@@ -1,5 +1,5 @@
 # coding=UTF-8
-import requests, json, ast, os
+import requests, ast, os, json, sys
 from bs4 import BeautifulSoup
 
 
@@ -43,5 +43,6 @@ class Downloader():
 
 
 if __name__ == '__main__':
-    d = Downloader('http://travel.fengniao.com/slide/526/5264127_1.html#p=1')
-    d.start()
+    print sys.argv
+    url = sys.argv[0]
+    d = Downloader(url)
