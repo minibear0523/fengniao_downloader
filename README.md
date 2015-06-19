@@ -8,7 +8,7 @@
 
 # Usage
 
-```python downloader <url> ```
+```python downloader.py <url> ```
 
 这里的url是http://*.fengniao.com/slide/* 的才可以.
 
